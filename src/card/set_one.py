@@ -39,6 +39,13 @@ class Card_stickman(Card):
     {$On Summon}: If another 'Angry Stickman' card has been destroyed, you may summon it for at double cost. This ability may be activated only once per turn.
     """
 
+    @classmethod
+    def on_summon(cls, instance):
+        graveyard = instance.owner.graveyard
+        stickmen = list(filter(lambda inst: inst.card == cls, graveyard))
+        if len(stickmen) and instance.owner.mana >= cls.cost * 2:
+            pass  # TODO: Player may summon one for for double cost
+
 
 class Card_changeling(Card):
     name = "Armoured Changeling"
@@ -73,8 +80,32 @@ class Card_assistant(Card):
     faction = CardFaction.SERVICE
     card_set = CardSet.CORESET2020
     """TODO:
-    {$Graytide}, for every card with '{$Graytide}', this card has +1/+1 on the field.
+    {$Graytide}, for every card with '{$Graytide}', this card has +1/+1  [[[ on the field. ]]]
     """
+
+    @classmethod
+    def on_summon(cls, instance):
+        count = 0
+        for card in instance.owner.hand:
+            if card.has_keyword(CardKeyword.GRAYTIDE):
+                count += 1
+        instance.add_buff('assistant_self_buff', (count, count))
+
+    @classmethod
+    def on_other_summon(cls, instance):
+        count = 0
+        for card in instance.owner.hand:
+            if card.has_keyword(CardKeyword.GRAYTIDE):
+                count += 1
+        instance.add_buff('assistant_self_buff', (count, count))
+
+    @classmethod
+    def on_other_death(cls, instance):
+        count = 0
+        for card in instance.owner.hand:
+            if card.has_keyword(CardKeyword.GRAYTIDE):
+                count += 1
+        instance.add_buff('assistant_self_buff', (count, count))
 
 
 class Card_atmos_tech(Card):
@@ -95,6 +126,15 @@ class Card_atmos_tech(Card):
     """TODO:
     {$On Summon}: Search your deck for an Atmospherics Battlefield card, and add it to your hand. Shuffle your deck afterward.
     """
+
+    @classmethod
+    def on_summon(cls, instance):
+        possible_cards = list(
+            filter(lambda inst: inst.has_subtype(CardSubtype.ATMOSPHERICS) and inst.card_type == CardType.BATTLEFIELD,
+                   instance.owner.deck))
+        if len(possible_cards):
+            pass  # TODO: Search your deck for an Atmospherics Battlefield card, and add it to your hand.
+        instance.owner.shuffle_deck()
 
 
 class Card_bartender(Card):
@@ -150,6 +190,11 @@ class Card_captain(Card):
     Tap this card: inflict -1/-1 to an opposing creature card.
     """
 
+    @classmethod
+    def on_tap(cls, instance):
+        target = None
+        target.add_temporary_buff((-1, -1))
+
 
 class Card_caps_suit(Card):
     name = "Apadyne Technologies Mk.2 R.I.O.T. Suit (Captain's Version)"
@@ -170,6 +215,10 @@ class Card_caps_suit(Card):
     {$On Equip}: tap the equipped card for 2 turns, without triggering the target card's effects.
     """
 
+    @classmethod
+    def on_equip(cls, instance):
+        pass
+
 
 class Card_cargo_tech(Card):
     name = "Cargo Technician"
@@ -186,9 +235,12 @@ class Card_cargo_tech(Card):
     rarity = CardRarity.COMMON
     faction = CardFaction.CARGO
     card_set = CardSet.CORESET2020
-    """TODO:
-    Once per turn, you may give 'Cargo Technician' -1/0 until the start of your next turn and gain 1 mana.
-    """
+
+    @classmethod
+    def ability_lifetap(cls, instance):
+        # TODO: Make this work, once per turn
+        instance.add_temporary_buff((-1, 0))
+        instance.owner.mana += 1
 
 
 class Card_chap_plate(Card):

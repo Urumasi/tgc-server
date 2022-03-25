@@ -19,42 +19,46 @@ class Card:
     card_set: CardSet = CardSet.NONE
     keywords: Set[CardKeyword] = set()
 
-    @staticmethod
-    def on_card_played():
-        pass
+    @classmethod
+    def on_card_played(cls, instance):
+        return True
 
-    @staticmethod
-    def on_summon():
-        pass
+    @classmethod
+    def on_summon(cls, instance):
+        return True
 
-    @staticmethod
-    def on_other_summon():
-        pass
+    @classmethod
+    def on_other_summon(cls, instance):
+        return True
 
-    @staticmethod
-    def on_death():
-        pass
+    @classmethod
+    def on_death(cls, instance):
+        return True
 
-    @staticmethod
-    def on_discard():
-        pass
+    @classmethod
+    def on_discard(cls, instance):
+        return True
 
-    @staticmethod
-    def on_other_death():
-        pass
+    @classmethod
+    def on_other_death(cls, instance):
+        return True
 
-    @staticmethod
-    def on_equip():
-        pass
+    @classmethod
+    def on_equip(cls, instance):
+        return True
 
-    @staticmethod
-    def on_unequip():
-        pass
+    @classmethod
+    def on_unequip(cls, instance):
+        return True
 
-    @staticmethod
-    def on_tap():
-        pass
+    @classmethod
+    def on_tap(cls, instance):
+        return True
 
-    @staticmethod
-    def on_sacrifice():
-        pass
+    @classmethod
+    def on_untap(cls, instance):
+        return True
+
+    @classmethod
+    def on_sacrifice(cls, instance):
+        return True
