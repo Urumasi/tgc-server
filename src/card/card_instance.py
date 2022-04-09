@@ -3,8 +3,10 @@ from src.card.types import *
 
 
 class CardInstance:
-    def __init__(self, card: Card, owner):
+    def __init__(self, card: Card, game, owner):
         self.owner = owner
+        self.game = game
+        self.equipped_to = None
         self.card = card
         self.max_resolve = self.card.resolve
         self.resolve = self.max_resolve
@@ -22,6 +24,7 @@ class CardInstance:
         self.owner = None
 
     def reset(self):
+        self.equipped_to = None
         self.max_resolve = self.card.resolve
         self.resolve = self.max_resolve
         self.max_power = self.card.power
@@ -35,10 +38,11 @@ class CardInstance:
         self.temp_buffs = list()
 
     def add_buff(self, name, amount):
-        self.remove_buff(name)
-        if amount == (0, 0):
-            return
-        self.buffs[name] = amount
+        if name is not None:
+            self.remove_buff(name)
+            if amount == (0, 0):
+                return
+            self.buffs[name] = amount
         self.max_power += amount[0]
         self.power += amount[0]
         self.max_resolve += amount[1]
