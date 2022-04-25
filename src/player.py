@@ -3,10 +3,12 @@ from typing import List
 from random import randint
 
 from src.card import CardInstance
+from src.interrupt import *
 
 
 class Player:
-    def __init__(self):
+    def __init__(self, game):
+        self.game = game
         self.hand: List[CardInstance] = list()
         self.board: List[CardInstance] = list()
         self.deck: List[CardInstance] = list()
@@ -14,6 +16,9 @@ class Player:
         self.health: int = 20
         self.max_mana: int = 0
         self.mana: int = 0
+
+    def __del__(self):
+        self.game = None
 
     def phase_draw(self, game):
         for card in self.board:
@@ -33,7 +38,10 @@ class Player:
 
     def phase_end(self, game):
         if len(self.hand) > 7:
-            pass  # TODO: Discard down to 7
+            # Discard down to 7
+            result = (yield ChooseMultipleFromListInterrupt(self.hand, len(self.hand) - 7))
+            for card in result:
+                self.discard_card(card)
 
     def shuffle_deck(self):
         shuffle(self.deck)
@@ -56,6 +64,11 @@ class Player:
             return card
         self.take_damage(1)
         # TODO: Player may draw a chosen card from their graveyard
+        result = (yield ChooseFromListInterrupt(self.graveyard, optional=True))
+        if result is not None:
+            self.add_card_to_hand(result)
+            self.on_card_drawn(result)
+            return result
         return None
 
     def play_card(self, card):
@@ -73,6 +86,7 @@ class Player:
             self.enter_the_battlefield(card)
         elif card in self.board:
             pass
+        # TODO: summon effects
 
     def add_card_to_hand(self, card):
         if card in self.deck:
@@ -82,7 +96,11 @@ class Player:
             self.graveyard.remove(card)
             self.hand.append(card)
         elif card in self.board:
-            pass  # TODO
+            card.reset()
+            # TODO: Unequip all equipment etc.
+            # TODO: split on_destroy to on_destroy and on_leave_board
+            self.board.remove(card)
+            self.hand.append(card)
         elif card in self.hand:
             pass
 
@@ -97,9 +115,6 @@ class Player:
             for c in player.board:
                 if c is not card:
                     c.on_other_summon(card)
-
-    def tap_card(self, card):
-        card.on_tap(card)
 
     def destroy_card(self, card):
         pass  # TODO

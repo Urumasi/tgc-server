@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 
 from src.player import Player
@@ -14,9 +15,20 @@ class GameState(Enum):
 
 class Game:
     def __init__(self):
-        self.players = [Player(), Player()]
+        self.created_time = datetime.now()
+        self.interacted_time = self.created_time
         self.turn_player = 0
         self.phase = GameState.NONE
+        self.players = [Player(self), Player(self)]
+        self.log = list()
+
+    def __del__(self):
+        pass
+
+    def main(self):
+        while True:
+            yield 123
+            self.turn_player = (self.turn_player + 1) % len(self.players)
 
     def phase_draw(self):
         ply = self.players[self.turn_player]

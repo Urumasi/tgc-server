@@ -109,10 +109,10 @@ class CardInstance:
 
     def tap(self):
         if not self.tapped:
-            if self.card.on_tap(self):
+            if self.card.on_tapped(self):
                 self.tapped = True
 
     def untap(self):
         if self.tapped:
-            if self.card.on_untap(self):
+            if self.card.on_untapped(self):
                 self.tapped = False

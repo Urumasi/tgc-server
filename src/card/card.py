@@ -19,6 +19,13 @@ class Card:
     card_set: CardSet = CardSet.NONE
     keywords: Set[CardKeyword] = set()
 
+    @classmethod
+    def init(cls, instance):
+        """
+        Called when a new card instance is created
+        """
+        pass
+
     # Return True to cancel something, for example destruction
 
     @classmethod
@@ -85,7 +92,13 @@ class Card:
         return False
 
     @classmethod
-    def on_untap(cls, instance):
+    def on_tapped(cls, instance):
+        """
+        When the current card is tapped by any means, not just its tap ability
+        """
+
+    @classmethod
+    def on_untapped(cls, instance):
         """
         When the current card is untapped
         """

@@ -6,13 +6,26 @@ class Interrupt:
         self.optional = optional
 
     def validate(self, value):
-        return False
+        return True
+
+
+class PayManaInterrupt(Interrupt):
+    def __init__(self, mana_cost, optional=False):
+        super().__init__(optional)
+        self.mana_cost = mana_cost
 
 
 class ChooseFromListInterrupt(Interrupt):
     def __init__(self, cards, optional=False):
         super().__init__(optional)
         self.cards = cards
+
+
+class ChooseMultipleFromListInterrupt(Interrupt):
+    def __init__(self, cards, num, optional=False):
+        super().__init__(optional)
+        self.cards = cards
+        self.num = num
 
 
 class ChooseBoardCreatureInterrupt(Interrupt):

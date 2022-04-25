@@ -8,7 +8,7 @@ class CardType(Enum):
     CREATURE = 3
     EVENT = 4
     EQUIPMENT = 5
-    HUMAN = 6
+    HUMAN = CREATURE  # Why does this exist...
 
 
 class CardSubtype(Enum):

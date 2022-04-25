@@ -428,7 +428,7 @@ class Card_cmo_suit(Card):
             yield ChooseOwnerBoardCreatureInterrupt(owner=instance.owner, filter=lambda creature: creature != instance))
         if result is None:
             return
-        instance.equipped_to.owner.tap_card(instance.equipped_to)
+        instance.equipped_to.tap()
         cls.on_unequip(instance, instance.equipped_to)
         cls.on_equip(instance, result)
 
@@ -1015,9 +1015,6 @@ class Card_spookian(Card):
     rarity = CardRarity.EPIC
     faction = CardFaction.SERVICE
     card_set = CardSet.CORESET2020
-    """TODO:
-    {$On Summon}: Search your deck for a battlefield, and add it to your hand. Shuffle your deck afterwards.
-    """
 
     @classmethod
     def on_summon(cls, instance):
@@ -1031,7 +1028,8 @@ class Card_spookian(Card):
 
 class Card_HOP(Card):
     name = "Head of Personnel"
-    description = """The head of the Cargo and Service Departments, guardian of all access, and Ian's lovable, yet dumb, sidekick."""
+    description = """The head of the Cargo and Service Departments, guardian of all access, and Ian's lovable, yet """ \
+                  """dumb, sidekick."""
     rules = """Once per turn: Select a friendly creature card. That card gains {$Changeling}."""
 
     cost = 7
@@ -1044,15 +1042,23 @@ class Card_HOP(Card):
     rarity = CardRarity.UNCOMMON
     faction = CardFaction.SERVICE
     card_set = CardSet.CORESET2020
-    """TODO:
-    Once per turn: Select a friendly creature card. That card gains {$Changeling}.
-    """
+
+    @classmethod
+    def ability_hop_access(cls, instance):
+        # TODO: Once per turn
+        result = (yield ChooseOwnerBoardCreatureInterrupt(instance.owner))
+        if result is None:
+            return
+        result.add_keyword(CardKeyword.CHANGELING)
 
 
 class Card_HOS(Card):
     name = "Head of Security"
-    description = """Nanotrasen hires most heads of staff based on their qualifications as being amicable, good at conflict resolution, ability to handle high-stakes situations, humanity, and desire to learn. Heads of Security only need a highschool degree."""
-    rules = """{$On Summon}: Select a card type. That card type now costs 1 extra mana to summon. This effect persists until Head of Security is removed from the battlefield."""
+    description = """Nanotrasen hires most heads of staff based on their qualifications as being amicable, good at """ \
+                  """conflict resolution, ability to handle high-stakes situations, humanity, and desire to learn. """ \
+                  """Heads of Security only need a highschool degree."""
+    rules = """{$On Summon}: Select a card type. That card type now costs 1 extra mana to summon. This effect """ \
+            """persists until Head of Security is removed from the battlefield."""
 
     cost = 7
     power = 4
@@ -1068,10 +1074,16 @@ class Card_HOS(Card):
     {$On Summon}: Select a card type. That card type now costs 1 extra mana to summon. This effect persists until Head of Security is removed from the battlefield.
     """
 
+    @classmethod
+    def on_summon(cls, instance):
+        pass  # TODO
+
 
 class Card_hos_suit(Card):
     name = "Apadyne Technologies 'Tyrant' Class Hardshell"
-    description = """The distinctive shape of the Tyrant Class Hardshell is caused, in part, by the large amount of kevlar reinforcement and the ablative armour layer. Perhaps more importantly, it also looks rad."""
+    description = """The distinctive shape of the Tyrant Class Hardshell is caused, in part, by the large amount """ \
+                  """of kevlar reinforcement and the ablative armour layer. Perhaps more importantly, it also """ \
+                  """looks rad."""
     rules = """Grant the equip card {$Fury} until this card is removed from play."""
 
     cost = 5
@@ -1088,10 +1100,19 @@ class Card_hos_suit(Card):
     Grant the equip card {$Fury} until this card is removed from play.
     """
 
+    @classmethod
+    def on_equip(cls, instance, target):
+        pass  # TODO
+
+    @classmethod
+    def on_unequip(cls, instance, target):
+        pass  # TODO
+
 
 class Card_ian(Card):
     name = "Ian"
-    description = """This adorable corgi has become the defacto mascot of the Spinward Stations to many. He comes in many forms, many sizes, and many shapes, but he's still just as lovable. Hand wash only."""
+    description = """This adorable corgi has become the defacto mascot of the Spinward Stations to many. He comes """ \
+                  """in many forms, many sizes, and many shapes, but he's still just as lovable. Hand wash only."""
     rules = """{$Holy}, You may Sacrifice this card on the field: Play a Command card from your hand for free."""
 
     cost = 4
@@ -1104,14 +1125,20 @@ class Card_ian(Card):
     rarity = CardRarity.COMMON
     faction = CardFaction.SERVICE
     card_set = CardSet.CORESET2020
-    """TODO:
-    {$Holy}, You may Sacrifice this card on the field: Play a Command card from your hand for free.
-    """
+
+    @classmethod
+    def on_sacrifice(cls, instance):
+        command_cards = list(filter(lambda inst: inst.faction == CardFaction.COMMAND, instance.owner.hand))
+        result = (yield ChooseFromListInterrupt(command_cards))
+        if result is not None:
+            return
+        instance.owner.play_card(result)
 
 
 class Card_inquisitor_suit(Card):
     name = "Inquisitor's Hardsuit"
-    description = """Nanotrasen officially doesn't believe in ghosts, magic, or anything that can't be solved with science. When you see someone show up in one of these, let that remind you of that fact."""
+    description = """Nanotrasen officially doesn't believe in ghosts, magic, or anything that can't be solved with """ \
+                  """science. When you see someone show up in one of these, let that remind you of that fact."""
     rules = """Apply {$First Strike} to the equip creature."""
 
     cost = 4
@@ -1128,10 +1155,19 @@ class Card_inquisitor_suit(Card):
     Apply {$First Strike} to the equip creature.
     """
 
+    @classmethod
+    def on_equip(cls, instance, target):
+        pass  # TODO
+
+    @classmethod
+    def on_unequip(cls, instance, target):
+        pass  # TODO
+
 
 class Card_intern(Card):
     name = "Intern"
-    description = """All Nanotrasen interns come with 3 things: A resume, a desire to learn, and vague promises that they're getting paid at some point. So don't be too rough on them."""
+    description = """All Nanotrasen interns come with 3 things: A resume, a desire to learn, and vague promises """ \
+                  """that they're getting paid at some point. So don't be too rough on them."""
     rules = """{$First Strike}"""
 
     cost = 1
@@ -1148,7 +1184,9 @@ class Card_intern(Card):
 
 class Card_jannie(Card):
     name = "Janitor"
-    description = """A true testament to futility, they clean and they clean and they clean, knowing that there's no way they can clean it all. Yet, they perservere, knowing that without them, the crew would simply give in to their base animalistic nature."""
+    description = """A true testament to futility, they clean and they clean and they clean, knowing that there's """ \
+                  """no way they can clean it all. Yet, they perservere, knowing that without them, the crew would """ \
+                  """simply give in to their base animalistic nature."""
     rules = """{$Taunt}"""
 
     cost = 1
@@ -1165,7 +1203,9 @@ class Card_jannie(Card):
 
 class Card_jannieborg(Card):
     name = "Cyborg (Custodial Shell)"
-    description = """A powerful, state of the act cleaning machine. They exist to eradicate stains, snag garbage, and replace lights, forever. We are legally obligated by the Janitor's Union to state that these machines are no replacement for a flesh-and-blood janitor."""
+    description = """A powerful, state of the act cleaning machine. They exist to eradicate stains, snag garbage, """ \
+                  """and replace lights, forever. We are legally obligated by the Janitor's Union to state that """ \
+                  """these machines are no replacement for a flesh-and-blood janitor."""
     rules = """{$Asimov}, you may tap this card: Tap an opponent's Human Creature as well."""
 
     cost = 2
@@ -1178,14 +1218,22 @@ class Card_jannieborg(Card):
     rarity = CardRarity.COMMON
     faction = CardFaction.SERVICE
     card_set = CardSet.CORESET2020
-    """TODO:
-    {$Asimov}, you may tap this card: Tap an opponent's Human Creature as well.
-    """
+
+    @classmethod
+    def on_tap(cls, instance):
+        result = (yield ChooseOpponentBoardCreatureInterrupt(instance.owner,
+                                                             filter=lambda creature: creature.has_subtype(
+                                                                 CardSubtype.HUMAN)))
+        if result is None:
+            return True
+        result.tap()
 
 
 class Card_lawyer(Card):
     name = "Lawyer"
-    description = """Nanotrasen knows the value of a good lawyer. That's why they're all working hard at our home offices defending us from frivolous labor suits from lazy no-good employees who should be working hard instead of slacking off reading trading cards."""
+    description = """Nanotrasen knows the value of a good lawyer. That's why they're all working hard at our home """ \
+                  """offices defending us from frivolous labor suits from lazy no-good employees who should be """ \
+                  """working hard instead of slacking off reading trading cards."""
     rules = """When an opponent attacks with a creature with 3 or more power, this card gains {$Taunt}."""
 
     cost = 2
@@ -1202,11 +1250,17 @@ class Card_lawyer(Card):
     When an opponent attacks with a creature with 3 or more power, this card gains {$Taunt}.
     """
 
+    # TODO: Order will matter with this card, make clientside GUI lawyer animate to gain block if you start dragging
+    # your 3 power creature to attack something
+
 
 class Card_legion(Card):
     name = "Legion"
-    description = """They are the cursed, damned souls of civilizations born and lost in the flames of Indecipheres, conglomerated into a lump of emaciated bodies, wandering the realms they used to rule... or something along those lines, anyway."""
-    rules = """When Legion is destroyed, search your deck for a human card, and summon it to the battlefield. Shuffle your deck afterward."""
+    description = """They are the cursed, damned souls of civilizations born and lost in the flames of """ \
+                  """Indecipheres, conglomerated into a lump of emaciated bodies, wandering the realms they used """ \
+                  """to rule... or something along those lines, anyway."""
+    rules = """When Legion is destroyed, search your deck for a human card, and summon it to the battlefield. """ \
+            """Shuffle your deck afterward."""
 
     cost = 3
     power = 2
@@ -1218,14 +1272,21 @@ class Card_legion(Card):
     rarity = CardRarity.UNCOMMON
     faction = CardFaction.XENO
     card_set = CardSet.CORESET2020
-    """TODO:
-    When Legion is destroyed, search your deck for a human card, and summon it to the battlefield. Shuffle your deck afterward.
-    """
+
+    @classmethod
+    def on_death(cls, instance):
+        human_cards = list(filter(lambda inst: inst.has_subtype(CardSubtype.HUMAN), instance.owner.deck))
+        result = (yield ChooseFromListInterrupt(human_cards, optional=True))
+        if result is None:
+            return
+        instance.owner.play_card(result)
 
 
 class Card_medborg(Card):
     name = "Cyborg (Medical Shell)"
-    description = """A state of the art medical shell, for when biological life just can't take care of itself. Comes equipped with built-in surgical equipment and all the medicated lollipops you could ever want."""
+    description = """A state of the art medical shell, for when biological life just can't take care of itself. """ \
+                  """Comes equipped with built-in surgical equipment and all the medicated lollipops you could """ \
+                  """ever want."""
     rules = """{$Asimov}, you may tap this card and pay 2 mana: Reset a card's resolve to it's original value."""
 
     cost = 4
@@ -1238,15 +1299,26 @@ class Card_medborg(Card):
     rarity = CardRarity.UNCOMMON
     faction = CardFaction.MEDICAL
     card_set = CardSet.CORESET2020
-    """TODO:
-    {$Asimov}, you may tap this card and pay 2 mana: Reset a card's resolve to it's original value.
-    """
+
+    @classmethod
+    def on_tap(cls, instance):
+        if instance.owner.mana < 2:
+            return True
+        result = (yield ChooseBoardCreatureInterrupt())
+        if result is None:
+            return True
+        instance.owner.mana -= 2
+        result.max_resolve = result.card.resolve
+        result.resolve = result.card.resolve
+        # TODO: Should it remove all resolve buffs/debuffs?
 
 
 class Card_doc(Card):
     name = "Medical Doctor"
-    description = """Nanotrasen's doctors are well known for their ability to treat almost any ailment known to mankind... as well as causing a fair few in the process."""
-    rules = """You may tap this card: Select a card that has less attack than this card from your graveyard, and summon it to your side of the field."""
+    description = """Nanotrasen's doctors are well known for their ability to treat almost any ailment known to """ \
+                  """mankind... as well as causing a fair few in the process."""
+    rules = """You may tap this card: Select a card that has less attack than this card from your graveyard, and """ \
+            """summon it to your side of the field."""
 
     cost = 3
     power = 2
@@ -1258,14 +1330,23 @@ class Card_doc(Card):
     rarity = CardRarity.COMMON
     faction = CardFaction.MEDICAL
     card_set = CardSet.CORESET2020
-    """TODO:
-    You may tap this card: Select a card that has less attack than this card from your graveyard, and summon it to your side of the field.
-    """
+
+    @classmethod
+    def on_tap(cls, instance):
+        possible_cards = list(filter(lambda inst: inst.card_type == CardType.CREATURE and inst.attack < instance.attack,
+                                     instance.owner.graveyard))
+        if not len(possible_cards):
+            return True
+        result = (yield ChooseFromListInterrupt(possible_cards))
+        if result is None:
+            return
+        instance.owner.play_card(result)
 
 
 class Card_mime(Card):
     name = "Mime"
-    description = """Si vous regardez attentivement dans les yeux d'un mime, vous pouvez voir le tourment sans fin derrière leur façade silencieuse. C'est vraiment tragique."""
+    description = """Si vous regardez attentivement dans les yeux d'un mime, vous pouvez voir le tourment sans fin """ \
+                  """derrière leur façade silencieuse. C'est vraiment tragique."""
     rules = """You may tap this card: Pick an opponent's card and nullify it's effect until it leaves play."""
 
     cost = 1
@@ -1282,11 +1363,16 @@ class Card_mime(Card):
     You may tap this card: Pick an opponent's card and nullify it's effect until it leaves play.
     """
 
+    # TODO
+
 
 class Card_miningborg(Card):
     name = "Cyborg (Mining Shell)"
-    description = """Fitted with a drill and tracks, the Mining Shell is designed to hold up to the rigours of mining, be that on the hellish surface of Indecipheres, or in the silent vacuum of the asteroid belt."""
-    rules = """{$Asimov}, at the end of your turn, if this card is not tapped, you may tap this card at the start of your next turn to gain 1 mana."""
+    description = """Fitted with a drill and tracks, the Mining Shell is designed to hold up to the rigours of """ \
+                  """mining, be that on the hellish surface of Indecipheres, or in the silent vacuum of the """ \
+                  """asteroid belt."""
+    rules = """{$Asimov}, at the end of your turn, if this card is not tapped, you may tap this card at the start """ \
+            """of your next turn to gain 1 mana."""
 
     cost = 2
     power = 3
@@ -1302,10 +1388,14 @@ class Card_miningborg(Card):
     {$Asimov}, at the end of your turn, if this card is not tapped, you may tap this card at the start of your next turn to gain 1 mana.
     """
 
+    # TODO: Guh??
+
 
 class Card_monkey(Card):
     name = "Monkey"
-    description = """Nanotrasen seeks to phase out animal testing by 2570, in accordance with new TerraGov legislation. This will be replaced with more ethical solutions, such as computer simulations, or experimentation on Staff Assistants."""
+    description = """Nanotrasen seeks to phase out animal testing by 2570, in accordance with new TerraGov """ \
+                  """legislation. This will be replaced with more ethical solutions, such as computer simulations, """ \
+                  """or experimentation on Staff Assistants."""
     rules = """{$Graytide}, this card is considered Human with a Geneticist on your side of the field."""
 
     cost = 1
@@ -1322,10 +1412,13 @@ class Card_monkey(Card):
     {$Graytide}, this card is considered Human with a Geneticist on your side of the field.
     """
 
+    # TODO: Fuck
+
 
 class Card_nukeop(Card):
     name = "Nuclear Operative"
-    description = """The frontline grunts of the syndicate army, Nuclear Operatives are typically well trained and equipped for their grim duty."""
+    description = """The frontline grunts of the syndicate army, Nuclear Operatives are typically well trained and """ \
+                  """equipped for their grim duty."""
     rules = """{$Squad Tactics}"""
 
     cost = 4
@@ -1342,7 +1435,8 @@ class Card_nukeop(Card):
 
 class Card_paramed(Card):
     name = "Paramedic"
-    description = """Nanotrasen encourages all paramedics to think of others before themselves- if this means running through a plasma fire to save a colleague, so be it."""
+    description = """Nanotrasen encourages all paramedics to think of others before themselves- if this means """ \
+                  """running through a plasma fire to save a colleague, so be it."""
     rules = """{$Taunt}, {$First Strike}"""
 
     cost = 3
@@ -1359,7 +1453,9 @@ class Card_paramed(Card):
 
 class Card_peaceborg(Card):
     name = "Cyborg (Peacekeeper Shell)"
-    description = """After the unilateral phasing out of Security Shells in 2554 following mass reports of cyborg-on-human violence, the Peacekeeper Shell was introduced as a stopgap solution until the problems could be resolved."""
+    description = """After the unilateral phasing out of Security Shells in 2554 following mass reports of """ \
+                  """cyborg-on-human violence, the Peacekeeper Shell was introduced as a stopgap solution until """ \
+                  """the problems could be resolved."""
     rules = """{$Asimov}, this card loses -1 power for every creature on your opponent's side of the field"""
 
     cost = 2
@@ -1376,10 +1472,29 @@ class Card_peaceborg(Card):
     {$Asimov}, this card loses -1 power for every creature on your opponent's side of the field
     """
 
+    @classmethod
+    def on_summon(cls, instance):
+        count = sum(len(list(filter(lambda inst: inst.card_type == CardType.CREATURE, ply.board))) for ply in
+                    instance.game.players if ply != instance.owner)
+        instance.add_buff('peaceborg_self_debuff', (-count, 0))
+
+    @classmethod
+    def on_other_summon(cls, instance, other):
+        count = sum(len(list(filter(lambda inst: inst.card_type == CardType.CREATURE, ply.board))) for ply in
+                    instance.game.players if ply != instance.owner)
+        instance.add_buff('peaceborg_self_debuff', (-count, 0))
+
+    @classmethod
+    def on_other_death(cls, instance, other, source):
+        count = sum(len(list(filter(lambda inst: inst.card_type == CardType.CREATURE, ply.board))) for ply in
+                    instance.game.players if ply != instance.owner)
+        instance.add_buff('peaceborg_self_debuff', (-count, 0))
+
 
 class Card_plasma_engi(Card):
     name = "Station Engineer (Plasmaman)"
-    description = """The ever industrious plasmamen are well suited to engineering work, due to their natural radiation resistance."""
+    description = """The ever industrious plasmamen are well suited to engineering work, due to their natural """ \
+                  """radiation resistance."""
     rules = """{$Immunity} to Battlefields"""
 
     cost = 5
@@ -1396,8 +1511,11 @@ class Card_plasma_engi(Card):
 
 class Card_QM(Card):
     name = "Quartermaster"
-    description = """Every Nanotrasen station has a Quartermaster, who controls the flow of cargo to and from the station, and by extension to and from the hands of the crew. He's not given the distinction of being a head, though. His job isn't hard enough."""
-    rules = """Pay 3 mana and tap this card: All card cards on your side of the field gain +1/+1 until the end of this turn."""
+    description = """Every Nanotrasen station has a Quartermaster, who controls the flow of cargo to and from the """ \
+                  """station, and by extension to and from the hands of the crew. He's not given the distinction """ \
+                  """of being a head, though. His job isn't hard enough."""
+    rules = """Pay 3 mana and tap this card: All card cards on your side of the field gain +1/+1 until the end of """ \
+            """this turn."""
 
     cost = 6
     power = 3
@@ -1409,15 +1527,24 @@ class Card_QM(Card):
     rarity = CardRarity.UNCOMMON
     faction = CardFaction.CARGO
     card_set = CardSet.CORESET2020
-    """TODO:
-    Pay 3 mana and tap this card: All card cards on your side of the field gain +1/+1 until the end of this turn.
-    """
+
+    @classmethod
+    def on_tap(cls, instance):
+        if instance.owner.mana < 3:
+            return True
+        instance.owner.mana -= 3
+        for card in instance.owner.board:
+            if card.card_type != CardType.CREATURE:
+                continue
+            card.add_temporary_buff((1, 1))
 
 
 class Card_qm_head(Card):
     name = "Quartermaster"
-    description = """Every Nanotrasen station has a Quartermaster, who controls the flow of cargo to and from the station, and by extension to and from the hands of the crew."""
-    rules = """Pay 8 mana and permanantly tap this card: All cargo cards on your side of the field gain +2/+2 until this card leaves play."""
+    description = """Every Nanotrasen station has a Quartermaster, who controls the flow of cargo to and from the """ \
+                  """station, and by extension to and from the hands of the crew."""
+    rules = """Pay 8 mana and permanantly tap this card: All cargo cards on your side of the field gain +2/+2 """ \
+            """until this card leaves play."""
 
     cost = 10
     power = 6
@@ -1429,14 +1556,28 @@ class Card_qm_head(Card):
     rarity = CardRarity.MISPRINT
     faction = CardFaction.CARGO
     card_set = CardSet.CORESET2020
-    """TODO:
-    Pay 8 mana and permanantly tap this card: All cargo cards on your side of the field gain +2/+2 until this card leaves play.
-    """
+
+    @classmethod
+    def init(cls, instance):
+        instance.activated = False
+
+    @classmethod
+    def on_tap(cls, instance):
+        if instance.owner.mana < 8:
+            return True
+        instance.owner.mana -= 8
+        instance.activated = True
+        # TODO: permanently tap this, make it work for multiple instances of qm_head
+
+    @classmethod
+    def on_death(cls, instance):
+        instance.activated = False
 
 
 class Card_rabbit_pai(Card):
     name = "Personal AI Device (Rabbit Shell)"
-    description = """Personal AI Devices are able to take the form of many household pets, to provide a homely sense of comfort and companionship to their owners."""
+    description = """Personal AI Devices are able to take the form of many household pets, to provide a homely """ \
+                  """sense of comfort and companionship to their owners."""
     rules = """This card may steal the {$Asimov} keyword off of another friendly silicon creature."""
 
     cost = 2
@@ -1449,14 +1590,21 @@ class Card_rabbit_pai(Card):
     rarity = CardRarity.COMMON
     faction = CardFaction.SCIENCE
     card_set = CardSet.CORESET2020
-    """TODO:
-    This card may steal the {$Asimov} keyword off of another friendly silicon creature.
-    """
+
+    @classmethod
+    def ability_steal(cls, instance):
+        result = (yield ChooseOwnerBoardCreatureInterrupt(instance.owner, filter=lambda creature: creature.has_subtype(
+            CardSubtype.SILICON), optional=True))
+        if result is None:
+            return
+        result.remove_subtype(CardSubtype.SILICON)
+        instance.add_subtype(CardSubtype.SILICON)
 
 
 class Card_drone_pai(Card):
     name = "Personal AI Device (Drone Shell)"
-    description = """The most basic Personal AI shell, the Drone Shell resembles the old maintainance drones used on Nanotrasen Stations prior to 'the incident', and is perfect for the tech-savvy AI-owner."""
+    description = """The most basic Personal AI shell, the Drone Shell resembles the old maintainance drones used """ \
+                  """on Nanotrasen Stations prior to 'the incident', and is perfect for the tech-savvy AI-owner."""
     rules = """You may pay 1 mana and tap this card: a silicon card may attack one additional time this turn."""
 
     cost = 5
@@ -1469,15 +1617,25 @@ class Card_drone_pai(Card):
     rarity = CardRarity.COMMON
     faction = CardFaction.SCIENCE
     card_set = CardSet.CORESET2020
-    """TODO:
-    You may pay 1 mana and tap this card: a silicon card may attack one additional time this turn.
-    """
+
+    @classmethod
+    def on_tap(cls, instance):
+        if instance.owner.mana < 1:
+            return True
+        result = (yield ChooseBoardCreatureInterrupt(filter=lambda creature: creature.has_subtype(CardSubtype.SILICON),
+                                                     optional=True))
+        if result is None:
+            return True
+        instance.owner.mana -= 1
+        # TODO: result may attack one additional time this turn
 
 
 class Card_RD(Card):
     name = "Research Director"
-    description = """The Research Director is the head of the Science Division, and is responsible for, shockingly, directing research."""
-    rules = """Once per turn, you may tap all Science faction cards in play, activate the effect of an event card twice."""
+    description = """The Research Director is the head of the Science Division, and is responsible for, """ \
+                  """shockingly, directing research."""
+    rules = """Once per turn, you may tap all Science faction cards in play, activate the effect of an event card """ \
+            """twice."""
 
     cost = 7
     power = 2
@@ -1493,10 +1651,21 @@ class Card_RD(Card):
     Once per turn, you may tap all Science faction cards in play, activate the effect of an event card twice.
     """
 
+    @classmethod
+    def ability_double_cast(cls, instance):
+        # TODO: Once per turn
+        for ply in instance.game.players:
+            for inst in ply.board:
+                if inst.faction != CardFaction.SCIENCE:
+                    continue
+                inst.tap()
+        # TODO: "activate the effect of an event card twice"
+
 
 class Card_rd_suit(Card):
     name = "Nakamura Engineering B.O.M.B.Suit"
-    description = """The Nakamura Engineering B.O.M.B.Suit is an innovative combination of a R.I.G.Suit and a bomb suit, perfect for toxins research."""
+    description = """The Nakamura Engineering B.O.M.B.Suit is an innovative combination of a R.I.G.Suit and a bomb """ \
+                  """suit, perfect for toxins research."""
     rules = """Reduces all battlefield damage to the equipped creature by 2."""
 
     cost = 1
@@ -1513,11 +1682,15 @@ class Card_rd_suit(Card):
     Reduces all battlefield damage to the equipped creature by 2.
     """
 
+    # TODO
+
 
 class Card_roboticist(Card):
     name = "Roboticist"
-    description = """The roboticist's work is as close as Nanotrasen legally allows its employees to come to necromancy."""
-    rules = """If a {$Asimov} card on your side of the field is destroyed, you may pay 2 mana and tap this card: Return that card to your hand."""
+    description = """The roboticist's work is as close as Nanotrasen legally allows its employees to come to """ \
+                  """necromancy."""
+    rules = """If a {$Asimov} card on your side of the field is destroyed, you may pay 2 mana and tap this card: """ \
+            """Return that card to your hand."""
 
     cost = 3
     power = 2
@@ -1529,14 +1702,28 @@ class Card_roboticist(Card):
     rarity = CardRarity.UNCOMMON
     faction = CardFaction.SCIENCE
     card_set = CardSet.CORESET2020
-    """TODO:
-    If a {$Asimov} card on your side of the field is destroyed, you may pay 2 mana and tap this card: Return that card to your hand.
-    """
+
+    @classmethod
+    def on_other_death(cls, instance, other, source):
+        if instance.tapped:
+            return
+        if other.owner != instance.owner:
+            return
+        if not other.has_keyword(CardKeyword.ASIMOV):
+            return
+        pay = (yield PayManaInterrupt(2))
+        if not pay:
+            return
+        instance.tap()
+        instance.owner.mana -= 2
+        instance.owner.add_card_to_hand(instance)
+        return True
 
 
 class Card_runtime(Card):
     name = "Runtime"
-    description = """Runtime is the CMO's personal feline companion, and is well known for her laziness. It's said that opening a tin of tuna anywhere on the station will bring her running."""
+    description = """Runtime is the CMO's personal feline companion, and is well known for her laziness. It's said """ \
+                  """that opening a tin of tuna anywhere on the station will bring her running."""
     rules = """You may sacrifice this card: reduce the cost of summoning a medical faction card this turn by 2 mana."""
 
     cost = 3
@@ -1552,6 +1739,10 @@ class Card_runtime(Card):
     """TODO:
     You may sacrifice this card: reduce the cost of summoning a medical faction card this turn by 2 mana.
     """
+
+    @classmethod
+    def on_sacrifice(cls, instance):
+        pass  # TODO
 
 
 class Card_scientist(Card):
@@ -1573,6 +1764,8 @@ class Card_scientist(Card):
     When this card is targeted by an opponent's single target event, you gain 1 lifeshard.
     """
 
+    # TODO
+
 
 class Card_secborg(Card):
     name = "Cyborg (Security Shell)"
@@ -1592,6 +1785,8 @@ class Card_secborg(Card):
     """TODO:
     {$Asimov}, when this card targets a human creature, deal 1 damage to it after the battle resolves.
     """
+
+    # TODO
 
 
 class Card_sec_officer(Card):
@@ -1630,6 +1825,14 @@ class Card_ratvar_armor(Card):
     While equipped, give the equipped unit {$Clockwork}.
     """
 
+    @classmethod
+    def on_equip(cls, instance, target):
+        pass  # TODO
+
+    @classmethod
+    def on_unequip(cls, instance, target):
+        pass  # TODO
+
 
 class Card_beercanborg(Card):
     name = "Cyborg (Service Shell- Beercan)"
@@ -1650,6 +1853,8 @@ class Card_beercanborg(Card):
     {$Asimov}, you may discard this card: draw one Service {$Faction} card from your deck, then shuffle.
     """
 
+    # TODO
+
 
 class Card_flamboyantborg(Card):
     name = "Cyborg (Service Shell- Flamboyant)"
@@ -1666,14 +1871,31 @@ class Card_flamboyantborg(Card):
     rarity = CardRarity.COMMON
     faction = CardFaction.SERVICE
     card_set = CardSet.CORESET2020
-    """TODO:
-    {$Asimov}, gains +2/+2 when it's the only card on your side of the field.
-    """
+
+    @classmethod
+    def on_summon(cls, instance):
+        if len(instance.owner.board) == 1:
+            instance.add_buff('flamboyant_self_buff', (2, 2))
+
+    @classmethod
+    def on_other_summon(cls, instance, other):
+        if len(instance.owner.board) == 1:
+            instance.add_buff('flamboyant_self_buff', (2, 2))
+        else:
+            instance.remove_buff('flamboyant_self_buff')
+
+    def on_other_death(cls, instance, other, source):
+        if len(instance.owner.board) == 1:
+            instance.add_buff('flamboyant_self_buff', (2, 2))
+        else:
+            instance.remove_buff('flamboyant_self_buff')
 
 
 class Card_skirtborg(Card):
     name = "Cyborg (Service Shell- Skirted)"
-    description = """The Service Shell is intended to be the most human of the Cyborg Shells, due to its outwardly social role- none exemplify this better than the Skirted Shell, showing that even robots can't escape fashion norms."""
+    description = """The Service Shell is intended to be the most human of the Cyborg Shells, due to its outwardly """ \
+                  """social role- none exemplify this better than the Skirted Shell, showing that even robots """ \
+                  """can't escape fashion norms."""
     rules = """{$Asimov}"""
 
     cost = 1
@@ -1690,8 +1912,10 @@ class Card_skirtborg(Card):
 
 class Card_classicborg(Card):
     name = "Cyborg (Service Shell- Classic)"
-    description = """The classic Service Shell, the Classic Shell is what most crewmembers think of when they think of a 'useless robot that serves drinks'."""
-    rules = """{$Asimov}, for every piece of equipment in play, gain +1 temporary resolve during the opponent's turn. That temporary resolve is lost at the start of your turn."""
+    description = """The classic Service Shell, the Classic Shell is what most crewmembers think of when they """ \
+                  """think of a 'useless robot that serves drinks'."""
+    rules = """{$Asimov}, for every piece of equipment in play, gain +1 temporary resolve during the opponent's """ \
+            """turn. That temporary resolve is lost at the start of your turn."""
 
     cost = 2
     power = 1
@@ -1706,6 +1930,8 @@ class Card_classicborg(Card):
     """TODO:
     {$Asimov}, for every piece of equipment in play, gain +1 temporary resolve during the opponent's turn. That temporary resolve is lost at the start of your turn.
     """
+
+    # TODO
 
 
 class Card_stylinborg(Card):
@@ -1727,8 +1953,10 @@ class Card_stylinborg(Card):
 
 class Card_miner(Card):
     name = "Shaft Miner"
-    description = """When the station needs materials, these are the guys who risk their lives, bravely pioneering the wastes of Indecipheres, to bring them in."""
-    rules = """Once per turn, you may pay 1 mana and tap this card: Draw one card from your deck, and either discard it, or send it to the bottom of your deck."""
+    description = """When the station needs materials, these are the guys who risk their lives, bravely pioneering """ \
+                  """the wastes of Indecipheres, to bring them in."""
+    rules = """Once per turn, you may pay 1 mana and tap this card: Draw one card from your deck, and either """ \
+            """discard it, or send it to the bottom of your deck."""
 
     cost = 5
     power = 5
